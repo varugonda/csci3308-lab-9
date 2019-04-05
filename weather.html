@@ -1,4 +1,5 @@
 <!-- Home Page -->
+<!-- Collaborated with Marlo Terr -->
 <!doctype html>
 <html lang="en">
   <head>
@@ -63,7 +64,7 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
 	<script>
 		$(document).ready(function() {
-			var url =''; //Place your DarkSky API Call Here 
+			var url ='https://api.darksky.net/forecast/40b04da3eaa98825e955185404296392/37.8267,-122.4233'; //Place your DarkSky API Call Here 
 			$.ajax({url:url, dataType:"jsonp"}).then(function(data) {
 				
 				/* 
@@ -91,7 +92,26 @@
 					8. summary_today: This will be updated to match the current summary for the day's weather.
 
 				*/
-				
+				console.log(data);//Review all of the data returned
+				console.log("Current Temp: " + data.currently.apparentTemperature);//View Today's Temp
+				console.log("Tomorrow's High: " + data.daily.data[1].apparentTemperatureHigh);//View Tomorrow's High
+				document.getElementById("image_today").src = "img/"+data.currently.icon+".png"
+				document.getElementById("icon_today").innerHTML = data.currently.icon
+				document.getElementById("temp_today").innerHTML = data.currently.apparentTemperature + " F"
+				if (data.currently.apparentTemperature > 100){
+					document.getElementById("thermometer_inner").style.height = 100 + "%"
+				}
+				else if (data.currently.apparentTemperature < 0){
+					document.getElementById("thermometer_inner").style.height = 0 + "%"
+				}
+				else{
+					document.getElementById("thermometer_inner").style.height = data.currently.apparentTemperature + "%"
+				}
+				document.getElementById("precip_today").innerHTML = data.currently.precipProbability * 100 + "%"
+				document.getElementById("humidity_today").innerHTML = data.currently.humidity * 100 + "%"
+				document.getElementById("wind_today").innerHTML = data.currently.windSpeed
+				document.getElementById("summary_today").innerHTML = data.currently.summary
+
 
 				/* Process the daily forecast for the next 6 days */
 				/*
@@ -114,9 +134,27 @@
 
 					<Hint/Note> - Make sure to use string concatenation to add the html code for the daily weather cards.  This should
 					be set to the innerHTML for the 6_day_forecast.
-
 				*/
+				var unix_time = data.currently.time;//Retrieve the current timestamp
+				var javascript_time = new Date(unix_time * 1000);//Convert the unix time stamp to javascript
+				console.log(javascript_time);
+				console.log(javascript_time.getDay());
 				var week_names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']; //This is a helper array to help convert the day of the week [0-7] to a named value [Sunday - Saturday]
+				var card = ''
+				for(var i = 1; i<7; i++){
+					var today = new Date(data.daily.data[i].time * 1000)
+					card += `<div class="col-2">
+						<div class="card">
+							<img class="card-img-top" src="img/${data.daily.data[i].icon}.png" alt="Card image cap">
+							<div class="card-body">
+								<h5 class="card-title">${week_names[today.getDay()]}</h5>
+								<p class="card-text">High: ${data.daily.data[i].apparentTemperatureHigh} F<br> 
+									Low: ${data.daily.data[i].apparentTemperatureLow} F</p>
+							</div>
+						</div>
+					</div>`
+					document.getElementById("6_day_forecast").innerHTML = card
+				}
 				
 			})
 		})
